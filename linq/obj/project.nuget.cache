@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "C0z8G/Rw7eU=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\marrt\\RiderProjects\\linq_learning\\linq\\linq.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\marrt\\.nuget\\packages\\microsoft.net.sdk.compilers.toolset\\9.0.200\\microsoft.net.sdk.compilers.toolset.9.0.200.nupkg.sha512"
+  ],
+  "logs": []
+}
