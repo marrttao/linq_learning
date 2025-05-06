@@ -24,6 +24,11 @@ class Program
         int[] numbers = new int[10];
         program.randomNumbers(numbers);
 
+        
+        IEnumerable<int> AllNumbers =
+            from number in numbers
+            select number;
+        
         IEnumerable<int> PairNumbers =
             from number in numbers
             where number % 2 == 0
