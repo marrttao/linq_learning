@@ -16,4 +16,8 @@
         <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\linq\linq.csproj" />
+    </ItemGroup>
+
 </Project>
