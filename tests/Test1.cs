@@ -1,148 +1,137 @@
-﻿using linq;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Linq;
+using linq;
 
-namespace tests;
-
-[TestClass]
-public sealed class Test1
+namespace tests
 {
-    private Brand[] brands;
-    private readonly DateTime fixedNow = new DateTime(2025, 5, 9); // Фиксированная дата
-
-    [TestInitialize]
-    public void Setup()
+    [TestClass]
+    public class LinqTests
     {
-        brands = new Brand[3];
-        brands[0] = new Brand
+       private List<Brand> GetTestBrands()
+{
+    return new List<Brand>
+    {
+        new Brand
         {
             name = "Food Company",
             date = new Date { year = 2020, month = 12, day = 23 },
             profile = "restorants",
             Director = new Director { name = "Jack", surname = "White", patronymic = "Paul" },
-            employees = 105,
-            country = "USA"
-        };
-        brands[1] = new Brand
+            country = "USA",
+            EmployeeList = new List<Employee>
+            {
+                new Employee { name = "Alice", surname = "Smith", position = "Chef", salary = 50000, phone = "123-456-7890", email = "alice@food.com" },
+                new Employee { name = "Bob", surname = "Johnson", position = "Manager", salary = 60000, phone = "123-456-7891", email = "bob@food.com" }
+            }
+        },
+        new Brand
         {
             name = "Black and White",
             date = new Date { year = 2021, month = 2, day = 2 },
             profile = "marketing",
             Director = new Director { name = "Paul", surname = "Black", patronymic = "Mike" },
-            employees = 99,
-            country = "London"
-        };
-        brands[2] = new Brand
+            country = "London",
+            EmployeeList = new List<Employee>
+            {
+                new Employee { name = "Charlie", surname = "Brown", position = "Designer", salary = 45000, phone = "123-456-7892", email = "di.charlie@bw.com" },
+                new Employee { name = "Lionel", surname = "Green", position = "Marketer", salary = 55000, phone = "123-456-7893", email = "diana@bw.com" }
+            }
+        },
+        new Brand
         {
             name = "Global Logic",
             date = new Date { year = 2022, month = 3, day = 3 },
             profile = "IT",
             Director = new Director { name = "Walter", surname = "White", patronymic = "Idk" },
-            employees = 400,
-            country = "Ukraine"
-        };
-    }
+            country = "Ukraine",
+            EmployeeList = new List<Employee>
+            {
+                new Employee { name = "Eve", surname = "Adams", position = "Developer", salary = 70000, phone = "231-456-7894", email = "eve@gl.com" },
+                new Employee { name = "Lionelo", surname = "Miller", position = "Manager", salary = 50000, phone = "123-456-7895", email = "lionel@gl.com" }
+            }
+        }
+    };
+}
 
-    [TestMethod]
-    public void TestBrandsInNameFood()
-    {
-        var result = from brand in brands
-                     where brand.name.Contains("Food")
-                     select brand;
+        [TestMethod]
+        public void TestGetEmployeesByCompanyName()
+        {
+            var brands = GetTestBrands();
+            var employees = brands
+                .Where(brand => brand.name.Equals("Food Company", System.StringComparison.OrdinalIgnoreCase))
+                .SelectMany(brand => brand.EmployeeList)
+                .ToList();
 
-        Assert.AreEqual(1, result.Count());
-        Assert.AreEqual("Food Company", result.First().name);
-    }
+            Assert.AreEqual(2, employees.Count);
+            Assert.IsTrue(employees.Any(e => e.name == "Alice"));
+            Assert.IsTrue(employees.Any(e => e.name == "Bob"));
+        }
 
-    [TestMethod]
-    public void TestMarketingBrands()
-    {
-        var result = from brand in brands
-                     where brand.profile == "marketing"
-                     select brand;
+        [TestMethod]
+        public void TestGetEmployeesByMinSalary()
+        {
+            var brands = GetTestBrands();
+            var employees = brands
+                .Where(brand => brand.name.Equals("Global Logic", System.StringComparison.OrdinalIgnoreCase))
+                .SelectMany(brand => brand.EmployeeList.Where(employee => employee.salary >= 60000))
+                .ToList();
 
-        Assert.AreEqual(1, result.Count());
-        Assert.AreEqual("Black and White", result.First().name);
-    }
+            Assert.AreEqual(1, employees.Count);
+            Assert.AreEqual("Eve", employees[0].name);
+        }
 
-    [TestMethod]
-    public void TestMarketinkOrITBrands()
-    {
-        var result = from brand in brands
-                     where brand.profile == "marketing" || brand.profile == "IT"
-                     select brand;
+        [TestMethod]
+        public void TestGetAllManagers()
+        {
+            var brands = GetTestBrands();
+            var managers = brands
+                .SelectMany(brand => brand.EmployeeList)
+                .Where(employee => employee.position == "Manager")
+                .ToList();
 
-        Assert.AreEqual(2, result.Count());
-    }
+            Assert.AreEqual(2, managers.Count);
+            Assert.IsTrue(managers.Any(m => m.name == "Bob"));
+            Assert.IsTrue(managers.Any(m => m.name == "Lionelo"));
+        }
 
-    [TestMethod]
-    public void TestBrandsEmployeesMoreThan100()
-    {
-        var result = from brand in brands
-                     where brand.employees > 100
-                     select brand;
+        [TestMethod]
+        public void TestGetEmployeesPhoneStartsWith23()
+        {
+            var brands = GetTestBrands();
+            var employees = brands
+                .SelectMany(brand => brand.EmployeeList)
+                .Where(employee => employee.phone.StartsWith("23"))
+                .ToList();
 
-        Assert.AreEqual(2, result.Count());
-    }
+            Assert.AreEqual(1, employees.Count);
+            Assert.AreEqual("Eve", employees[0].name);
+        }
 
-    [TestMethod]
-    public void TestBrandsEmployeesBetween100and300()
-    {
-        var result = from brand in brands
-                     where brand.employees > 100 && brand.employees < 300
-                     select brand;
+        [TestMethod]
+        public void TestGetEmployeesEmailStartsWithDi()
+        {
+            var brands = GetTestBrands();
+            var employees = brands
+                .SelectMany(brand => brand.EmployeeList)
+                .Where(employee => employee.email.StartsWith("di"))
+                .ToList();
 
-        Assert.AreEqual(1, result.Count());
-        Assert.AreEqual("Food Company", result.First().name);
-    }
+            Assert.AreEqual(1, employees.Count);
+            Assert.AreEqual("Charlie", employees[0].name);
+        }
 
-    [TestMethod]
-    public void TestBrandsInLondon()
-    {
-        var result = from brand in brands
-                     where brand.country == "London"
-                     select brand;
+        [TestMethod]
+        public void TestGetAllLionels()
+        {
+            var brands = GetTestBrands();
+            var lionels = brands
+                .SelectMany(brand => brand.EmployeeList)
+                .Where(employee => employee.name == "Lionel")
+                .ToList();
 
-        Assert.AreEqual(1, result.Count());
-        Assert.AreEqual("Black and White", result.First().name);
-    }
-
-    [TestMethod]
-    public void TestBrandDirectorSurnameWhite()
-    {
-        var result = from brand in brands
-                     where brand.Director.surname == "White"
-                     select brand;
-
-        Assert.AreEqual(2, result.Count());
-    }
-
-    [TestMethod]
-    public void TestBrandStartedMoreThan2YearsAgo()
-    {
-        var result = from brand in brands
-            where (fixedNow - new DateTime(brand.date.year, brand.date.month, brand.date.day)).TotalDays > 730
-            select brand;
-
-        Assert.AreEqual(3, result.Count());
-    }
-
-    [TestMethod]
-    public void TestBrandStarted123DaysAgo()
-    {
-        var result = from brand in brands
-            where (fixedNow - new DateTime(brand.date.year, brand.date.month, brand.date.day)).TotalDays > 123
-            select brand;
-
-        Assert.AreEqual(3, result.Count());
-    }
-
-    [TestMethod]
-    public void TestBrandDirectorSurnameBlackAndNameIncludesBlack()
-    {
-        var result = from brand in brands
-                     where brand.Director.surname == "Black" && brand.name.Contains("Black")
-                     select brand;
-
-        Assert.AreEqual(1, result.Count());
-        Assert.AreEqual("Black and White", result.First().name);
+            Assert.AreEqual(1, lionels.Count);
+            Assert.AreEqual("Lionel", lionels[0].name);
+        }
     }
 }
